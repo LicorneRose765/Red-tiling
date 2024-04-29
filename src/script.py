@@ -76,7 +76,7 @@ def print_board(np_array):
         print()
 
 
-def display_board(np_array):
+def display_board(np_array, name="Board"):
     """
     Display the board in a window
     """
@@ -92,6 +92,7 @@ def display_board(np_array):
     ax.imshow(np_array, cmap=cmap_custom, interpolation="nearest", extent=extent)
 
     plt.grid(True)
+    plt.title(name.split(".")[0].split("/")[-1])
     plt.show()
 
 
@@ -109,4 +110,4 @@ if __name__ == "__main__":
     
     board = read_db_file(db_file)
     print_board(board)
-    display_board(board)
+    display_board(board, db_file)
