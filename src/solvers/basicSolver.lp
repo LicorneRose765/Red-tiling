@@ -1,6 +1,27 @@
+% ============================= Parameters =============================
+% N : width of the board
+% M : height of the board
+% K : number of blue pieces to cover at most
+% =====================================================================
+% ============================= Pieces given ==========================
+% We have a relation h/11 that gives the number of pieces available for each type
+available(1, X) :- h(X,_,_,_,_,_,_,_,_,_,_).
+available(2, X) :- h(_,X,_,_,_,_,_,_,_,_,_).
+available(3, X) :- h(_,_,X,_,_,_,_,_,_,_,_).
+available(4, X) :- h(_,_,_,X,_,_,_,_,_,_,_).
+available(5, X) :- h(_,_,_,_,X,_,_,_,_,_,_).
+available(6, X) :- h(_,_,_,_,_,X,_,_,_,_,_).
+available(7, X) :- h(_,_,_,_,_,_,X,_,_,_,_).
+available(8, X) :- h(_,_,_,_,_,_,_,X,_,_,_).
+available(9, X) :- h(_,_,_,_,_,_,_,_,X,_,_).
+available(10, X) :- h(_,_,_,_,_,_,_,_,_,X,_).
+available(11, X) :- h(_,_,_,_,_,_,_,_,_,_,X).
+% =====================================================================
+
+
 % ====== Type 1 : dot ========= 
 % #
-one(1, 0, X, Y) :- params(N+1, M+1, K),
+one(1, X, Y) :- params(N+1, M+1, K),
     X = 0..N,
     Y = 0..M.
 % =============================    
@@ -152,7 +173,7 @@ four(8, 90, X1, Y1, XP2, YP2, XP3, YP3, XP4, YP4) :-
     XP3 <= N,
     YP3 = Y3-2,
     XP4 = X4-1,
-    YP4 = Y4-1.
+    YP4 = Y4-1,
     YP4 >= 0.
 
 four(8, 180, X1, Y1, XP2, YP2, XP3, YP3, XP4, YP4) :-
@@ -212,7 +233,7 @@ four(9, 180, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
     YP3 = Y3-1,
     YP3 >= 0,
     XP4 = X4-2,
-    YP4 = Y4-2.
+    YP4 = Y4-2,
     YP4 >= 0.
 four(9, 270, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
     params(N+1, M+1, K),
@@ -295,3 +316,25 @@ four(11, 90, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
     YP4 = Y4-2.
 % =============================    
    
+
+
+% ================= Solution generation =================
+% Generate a solution for a size type of piece
+
+% size 1 
+% TODO: add constraints to avoid overlapping
+0 {one_sol(T, X, Y) : one(T, X, Y)} Max :- available(T, Max).
+
+% size 2
+0 {two_sol(T,Rot,X1, Y1, X2, Y2) : two(T,Rot,X1, Y1, X2, Y2)} Max :- available(T, Max).
+
+% size 3
+0 {three_sol(T,Rot,X1, Y1, X2, Y2, X3, Y3) : three(T,Rot,X1, Y1, X2, Y2, X3, Y3)} Max :- available(T, Max).
+
+% size 4
+0 {four_sol(T,Rot,X1, Y1, X2, Y2, X3, Y3, X4, Y4) : four(T,Rot,X1, Y1, X2, Y2, X3, Y3, X4, Y4)} Max :- available(T, Max).
+
+#show one_sol/3.
+#show two_sol/6.
+#show three_sol/8.
+#show four_sol/10.
