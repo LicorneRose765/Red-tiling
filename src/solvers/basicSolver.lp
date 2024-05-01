@@ -2,6 +2,7 @@
 % N : width of the board
 % M : height of the board
 % K : number of blue pieces to cover at most
+% Be careful that, in the program, you should use N-1 and M-1 to get the last index of the board
 % =====================================================================
 % ============================= Pieces given ==========================
 % We have a relation h/11 that gives the number of pieces available for each type
@@ -16,6 +17,9 @@ available(8, X) :- h(_,_,_,_,_,_,_,X,_,_,_).
 available(9, X) :- h(_,_,_,_,_,_,_,_,X,_,_).
 available(10, X) :- h(_,_,_,_,_,_,_,_,_,X,_).
 available(11, X) :- h(_,_,_,_,_,_,_,_,_,_,X).
+
+blue(-1,-1). % Only there to avoid warnings
+red(-1,-1). % Only there to avoid warnings
 % =====================================================================
 
 
@@ -36,14 +40,12 @@ two(2, 0, X1, Y1, X1, Y2) :-
     Y1 = 0..M-1,
     Y2 = Y1+1.
 
-two(2, 90, X1, Y1, XP2, YP2) :-
-    % Rotation axis is (X1, Y1)
+two(2, 90, X1, Y1, X2, Y1) :-
+    % ##
     params(N+1, M+1, K),
-    two(2, 0, X1, Y1, X2, Y2),
-    XP2 = X1 + 1,
-    XP2 <= N,
-    YP2 = Y1 - 1,
-    YP2 >= 0.
+    X1 = 0..N-1,
+    X2 = X1+1,
+    Y1 = 0..M.
 % =============================
 
 
@@ -57,18 +59,14 @@ three(3, 0, X1, Y1, X1, Y2, X1, Y3) :-
     Y1 = 0..M-2,
     Y2 = Y1+1,
     Y3 = Y1+2.
-three(3, 90, XP1, YP1, X2, Y2, XP3, YP3) :-
-    % Rotation axis is (X2, Y2) (middle point)
+three(3, 90, X1, Y1, X2, Y1, X3, Y1) :-
+    %   ###
     params(N+1, M+1, K),
-    three(3, 0, X1, Y1, X2, Y2, X3, Y3),
-    XP1 = X2 + 1,
-    XP1 <= N,
-    YP1 = Y2 - 1,
-    YP1 >= 0,
-    XP3 = X2 - 1,
-    XP3 >= 0,
-    YP3 = Y2 + 1,
-    YP3 <= M.
+    X1 = 0..N-2,
+    X2 = X1+1,
+    X3 = X1+2,
+    Y1 = 0..M.
+    
 % =============================
 
 
@@ -112,17 +110,18 @@ four(6, 0, X1, Y1, X2, Y1, X2, Y2, X3, Y2) :-
     X3 = X1+2,
     Y1 = 0..M-1,
     Y2 = Y1+1.
-four(6, 90, X1, YP1, XP2, Y2, X3, YP3, X4, YP4) :- 
+
+four(6, 90, X1, Y1, X1, Y2, X2, Y2, X2, Y3) :- 
+    % #
+    % ##
+    %  #
     params(N+1, M+1, K),
-    four(6, 0, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    YP1 = Y1+1,
-    YP1 <= M,
-    XP2 = X2+1,
-    XP2 <= N,
-    YP3 = Y2-1,
-    YP3 >= 0,
-    YP4 = Y3-2,
-    YP4 >= 0.
+    X1 = 0..N-1,
+    X2 = X1+1,
+    Y1 = 2..M,
+    Y2 = Y1-1,
+    Y3 = Y1-2.
+
 % =============================
 
 
@@ -136,19 +135,17 @@ four(7, 0, X1, Y1, X2, Y1, X2, Y2, X3, Y2) :-
     X3 = X1+2,
     Y1 = 1..M,
     Y2 = Y1-1.
-four(7, 90, XP1, Y1, X2, YP2, XP3, Y3, XP4, YP4):-
+four(7, 90, X1, Y1, X1, Y2, X2, Y2, X2, Y3):-
+    %  #
+    % ##
+    % #
     params(N+1, M+1, K),
-    four(7, 0, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP1 = X1+1,
-    XP1 <= N,
-    YP2 = Y2-1,
-    YP2 <= M,
-    XP3 = X3-1,
-    XP3 >= 0,
-    XP4 = X4-2,
-    XP4 >= 0,
-    YP4 = Y4-1,
-    YP4 >= 0.    
+    X1 = 0..N-1,
+    X2 = X1+1,
+    Y1 = 0..M-2,
+    Y2 = Y1+1,
+    Y3 = Y1+2.
+     
 % =============================
 
 
@@ -164,40 +161,39 @@ four(8, 0, X1, Y1, X1, Y2, X1, Y3, X2, Y1) :-
     Y2 = Y1+1,
     Y3 = Y1+2.
 
-four(8, 90, X1, Y1, XP2, YP2, XP3, YP3, XP4, YP4) :-
+four(8, 90, X1, Y1, X1, Y2, X2, Y2, X3, Y2) :-
+    % ###
+    % #
     params(N+1, M+1, K),
-    four(8, 0, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP2 = X2+1,
-    YP2 = Y2-1,
-    XP3 = X3+2,
-    XP3 <= N,
-    YP3 = Y3-2,
-    XP4 = X4-1,
-    YP4 = Y4-1,
-    YP4 >= 0.
+    X1 = 0..N,
+    X2 = X1+1,
+    X3 = X1+2,
+    Y1 = 0..M-1,
+    Y2 = Y1+1.
+    
 
-four(8, 180, X1, Y1, XP2, YP2, XP3, YP3, XP4, YP4) :-
+four(8, 180, X1, Y1, X2, Y1, X2, Y2, X2, Y3) :-
+    % ##
+    %  #
+    %  #
     params(N+1, M+1, K),
-    four(8, 90, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP2 = X2-1,
-    YP2 = Y2-1,
-    XP3 = X3-2,
-    YP3 = Y3-2,
-    YP3 >= 0,
-    XP4 = X4-1,
-    XP4 >= 0,
-    YP4 = Y4-1.
+    X1 = 0..N-1,
+    X2 = X1+1,
+    Y1 = 2..M,
+    Y2 = Y1-1,
+    Y3 = Y1-2.
+    
 
-four(8, 270, X1, Y1, XP2, YP2, XP3, YP3, XP4, YP4) :-
+four(8, 270, X1, Y1, X2, Y1, X3, Y1, X3, Y2) :-
+    %   #
+    % ###
     params(N+1, M+1, K),
-    four(8, 180, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP2 = X2-1,
-    YP2 = Y2+1,
-    XP3 = X3-2,
-    XP3 >= 0,
-    YP3 = Y3+2,
-    XP4 = X4+1,
-    YP4 = Y4+1.
+    X1 = 0..N-2,
+    X2 = X1+1,
+    X3 = X1+2,
+    Y1 = 0..M-1,
+    Y2 = Y1+1.
+    
 % =============================
 
 
@@ -212,39 +208,38 @@ four(9, 0, X1, Y1, X2, Y1, X2, Y2, X2, Y3) :-
     Y1 = 0..M-2,
     Y2 = Y1+1,
     Y3 = Y1+2.
+    
+four(9, 90, X1, Y1, X1, Y2, X2, Y1, X3, Y1) :-
+    % #
+    % ###
+    params(N+1, M+1, K),
+    X1 = 0..N-2,
+    X2 = X1+1,
+    X3 = X1+2,
+    Y1 = 0..M-1,
+    Y2 = Y1+1.
 
-four(9, 90, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
+four(9, 180, X1, Y1, X1, Y2, X1, Y3, X2, Y3) :-
+    % ##
+    % #
+    % #
     params(N+1, M+1, K),
-    four(9, 0, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP1 = X1+1, 
-    YP1 = Y1+1,
-    XP3 = X3+1,
-    XP3 <= N,
-    YP3 = Y3-1,
-    XP4 = X4+2,
-    XP4 <= N,
-    YP4 = Y4-2.
-four(9, 180, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
+    X1 = 0..N-1,
+    X2 = X1+1,
+    Y1 = 0..M-2,
+    Y2 = Y1+1,
+    Y3 = Y1+2.
+
+four(9, 270, X1, Y1, X2, Y1, X3, Y1, X3, Y2) :-
+    % ###
+    %   #
     params(N+1, M+1, K),
-    four(9, 90, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP1 = X1+1,
-    YP1 = Y1-1,
-    XP3 = X3-1,
-    YP3 = Y3-1,
-    YP3 >= 0,
-    XP4 = X4-2,
-    YP4 = Y4-2,
-    YP4 >= 0.
-four(9, 270, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
-    params(N+1, M+1, K),
-    four(9, 180, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP1 = X1-1,
-    YP1 = Y1-1,
-    XP3 = X3-1,
-    YP3 = Y3+1,
-    XP4 = X4-2,
-    XP4 >= 0,
-    YP4 = Y4+2.
+    X1 = 0..N-2,
+    X2 = X1+1,
+    X3 = X1+2,
+    Y1 = 1..M,
+    Y2 = Y1-1.
+
 % =============================  
 
 
@@ -258,34 +253,39 @@ four(10, 0, X1, Y1, X2, Y1, X3, Y1, X2, Y2) :-
     X3 = X1+2,
     Y1 = 1..M,
     Y2 = Y1-1.
-four(10, 90, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
+
+four(10, 90, X2, Y1, X2, Y2, X1, Y2, X2, Y3) :-
+    %  #
+    % ##
+    %  #
     params(N+1, M+1, K),
-    four(10, 0, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP1 = X1+1,
-    YP1 = Y1+1,
-    YP1 <= M,
-    XP3 = X3-1,
-    YP3 = Y3-1,
-    XP4 = X4-1,
-    YP4 = Y4+1.
-four(10, 180, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
+    X1 = 0..N-1,
+    X2 = X1+1,
+    Y1 = 0..M-2,
+    Y2 = Y1+1,
+    Y3 = Y1+2.
+    
+four(10, 180, X1, Y1, X2, Y1, X2, Y2, X3, Y1) :-
+    %  #
+    % ###
     params(N+1, M+1, K),
-    four(10, 90, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP1 = X1+1,
-    YP1 = Y1-1,
-    XP3 = X3-1,
-    YP3 = Y3-1,
-    XP4 = X4+1,
-    YP4 = Y4+1.
-four(10, 270, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
+    X1 = 0..N-2,
+    X2 = X1+1,
+    X3 = X1+2,
+    Y1 = 0..M-1,
+    Y2 = Y1+1.
+
+four(10, 270, X1, Y1, X1, Y2, X2, Y2, X1, Y3) :-
+    % # 
+    % ##
+    % #
     params(N+1, M+1, K),
-    four(10, 180, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP1 = X1-1,
-    YP1 = Y1-1,
-    XP3 = X3+1,
-    YP3 = Y3+1,
-    XP4 = X4+1,
-    YP4 = Y4-1.
+    X1 = 0..N-1,
+    X2 = X1+1,
+    Y1 = 0..M-2,
+    Y2 = Y1+1,
+    Y3 = Y1+2.
+
 % =============================
 
 
@@ -301,19 +301,15 @@ four(11, 0, X1, Y1, X1, Y2, X1, Y3, X1, Y4) :-
     Y2 = Y1+1,
     Y3 = Y1+2,
     Y4 = Y1+3.
-four(11, 90, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
-    % Rotation axis is (X2, Y2)
+four(11, 90, X1, Y1, X2, Y1, X3, Y1, X4, Y1) :-
+    % ####
     params(N+1, M+1, K),
-    four(11, 0, X1, Y1, X2, Y2, X3, Y3, X4, Y4),
-    XP1 = X1-1,
-    XP1 >= 0,
-    YP1 = Y1+1,
-    XP3 = X3+1,
-    XP3 <= N,
-    YP3 = Y3-1,
-    XP4 = X4+2,
-    XP4 <= N,
-    YP4 = Y4-2.
+    X1 = 0..N-3,
+    X2 = X1+1,
+    X3 = X1+2,
+    X4 = X1+3,
+    Y1 = 0..M.
+    
 % =============================    
    
 
@@ -334,6 +330,55 @@ four(11, 90, XP1, YP1, X2, Y2, XP3, YP3, XP4, YP4) :-
 % size 4
 0 {four_sol(T,Rot,X1, Y1, X2, Y2, X3, Y3, X4, Y4) : four(T,Rot,X1, Y1, X2, Y2, X3, Y3, X4, Y4)} Max :- available(T, Max).
 
+
+
+% ============================= Helpers =================================
+isCovered(X, Y, T, 0) :- one_sol(T, X, Y).
+isCovered(X, Y, T, R) :- two_sol(T, R, _, _, X, Y).
+isCovered(X, Y, T, R) :- two_sol(T, R, X, Y, _, _).
+isCovered(X, Y, T, R) :- three_sol(T, R, X, Y, _, _, _, _).
+isCovered(X, Y, T, R) :- three_sol(T, R, _, _, X, Y, _, _).
+isCovered(X, Y, T, R) :- three_sol(T, R, _, _, _, _, X, Y).
+isCovered(X, Y, T, R) :- four_sol(T, R, X, Y, _, _, _, _, _, _).
+isCovered(X, Y, T, R) :- four_sol(T, R, _, _, X, Y, _, _, _, _).
+isCovered(X, Y, T, R) :- four_sol(T, R, _, _, _, _, X, Y, _, _).
+isCovered(X, Y, T, R) :- four_sol(T, R, _, _, _, _, _, _, X, Y).             
+
+% ============================= Constraints =============================
+% Constraint 0 : A piece cannot overlap with another piece.
+% a : if two piece of different types/rotation overlap
+:- isCovered(X, Y, T1, _), isCovered(X, Y, T2, _), T1 != T2.
+:- isCovered(X, Y, _, R1), isCovered(X, Y, _, R2), R1 != R2.
+% b : if two piece of the same type and rotation overlap
+:- two_sol(T, R, X, Y, _, _), two_sol(T, R, _, _, X, Y).
+
+:- three_sol(T, R, X, Y, _, _, _, _), three_sol(T, R, _, _, X, Y, _, _).
+:- three_sol(T, R, X, Y, _, _, _, _), three_sol(T, R, _, _, _, _, X, Y).
+:- three_sol(T, R, _, _, X, Y, _, _), three_sol(T, R, _, _, _, _, X, Y).
+
+:- four_sol(T, R, X, Y, _, _, _, _, _, _), four_sol(T, R, _, _, X, Y, _, _, _, _).
+:- four_sol(t, R, X, Y, _, _, _, _, _, _), four_sol(T, R, _, _, _, _, X, Y, _, _).
+:- four_sol(T, R, X, Y, _, _, _, _, _, _), four_sol(T, R, _, _, _, _, _, _, X, Y).
+
+
+:- four_sol(T, R, _, _, X, Y, _, _, _, _), four_sol(T, R, _, _, _, _, X, Y, _, _).
+:- four_sol(T, R, _, _, X, Y, _, _, _, _), four_sol(T, R, _, _, _, _, _, _, X, Y).
+
+:- four_sol(T, R, _, _, _, _, X, Y, _, _), four_sol(T, R, _, _, _, _, _, _, X, Y).
+
+
+
+% Constraint 1 : A red cell cannot be covered.
+:- red(X, Y), isCovered(X, Y, _, _). % If a cell is red, it cannot be covered.
+
+% Constraint 2 : Every white cell must be covered by a piece.
+:- params(N+1,M+1,_), X=0..N, Y=0..M, not red(X, Y), not blue(X, Y), not isCovered(X, Y, _, _).
+
+% Constraint 4 : At most K blue cells can be covered.
+% If the number of blue cells that are covered are greater than K.
+:- params(_,_,K), Number > K, Number = #count {covered(X,Y) : blue(X, Y),isCovered(X, Y, _, _)}.
+
+% ========================================================================
 #show one_sol/3.
 #show two_sol/6.
 #show three_sol/8.
