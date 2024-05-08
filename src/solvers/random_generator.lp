@@ -5,10 +5,14 @@
 % K : number of blue pieces to cover at most
 % Red : Number of red cells
 % Blue : Number of blue cells
-params(5, 5, 2).
-redNumber(6).
-blueNumber(2).
-pieceNumber(10).
+paramVals(N, M, K) :- N=3..9, M=3..9, K=1..5.
+1{params(N, M, K) : paramVals(N, M, K)}1.
+redNumberVals(R) :- params(N, M, _), R=1..N*M/2.
+1{redNumber(R) : redNumberVals(R)}1.
+blueNumberVals(B) :- redNumber(R), params(N, M, K), B=0..((N*M)/2)-R.
+1{blueNumber(B) : blueNumberVals(B)}1.
+pieceNumberVals(P) :- params(N, M, _), P=1..N*M.
+1{pieceNumber(P) : pieceNumberVals(P)}1. 
 
 % Be careful that, in the program, you should use N-1 and M-1 to get the last index of the board
 % =====================================================================
