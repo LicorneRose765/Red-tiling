@@ -5,16 +5,12 @@
 % K : number of blue pieces to cover at most
 % Red : Number of red cells
 % Blue : Number of blue cells
-params(5, 5, 2).
-redNumber(6).
-blueNumber(2).
-pieceNumber(10).
 
 % Be careful that, in the program, you should use N-1 and M-1 to get the last index of the board
 % =====================================================================
 
-blue(-1,-1). % Only there to avoid warnings
-red(-1,-1). % Only there to avoid warnings
+blue(-1,-1). % Only there to avoid warnings and make the generator faster
+red(-1,-1). % Only there to avoid warnings and make the generator faster
 % =====================================================================
 
 

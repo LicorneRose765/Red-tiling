@@ -1,0 +1,11 @@
+% ============================= Parameters =============================
+% params(N, M, K)
+% N : width of the board
+% M : height of the board
+% K : number of blue pieces to cover at most
+% Red : Number of red cells
+% Blue : Number of blue cells
+params(5, 5, 2).
+redNumber(6).
+blueNumber(2).
+pieceNumber(10).

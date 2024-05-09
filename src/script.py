@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
+from more_itertools import first_true
 
 
 pieces_dict = {
@@ -12,9 +13,9 @@ pieces_dict = {
     6: [(0,0), (1,0), (1,1), (2,1)],
     7: [(0,1), (1,1), (1,0), (2,0)],
     8: [(0,2), (0,1), (0,0), (1,0)],
-    9: [(0,0), (1,0), (1,1), (1,3)],
+    9: [(1,0), (2,0), (2,1), (2,2)],
     10: [(0,1), (1,1), (1,0), (2,1)],
-    11: [(0,0), (0,1), (0, 2), (0,3)]
+    11: [(0,0), (1,0), (2, 0), (3,0)]
 }
 
 
@@ -117,9 +118,9 @@ def get_board_for_piece(piece_type):
 
     # Add points to the piece
     for point in pieces_dict[piece_type]:
-        board[point[0]][point[1]] = 1
+        board[point[1]][point[0]] = 1
 
-    return board
+    return board[::-1]
 
 
 def display_pieces(pieces):
@@ -276,9 +277,106 @@ def display_board(board, name="Board"):
     plt.show()
 
 
+def read_generated_board(generated, ):
+    """
+    Read the output of a generator, return the board and a string containing an output corresponding to solver standards  
+
+
+    # Input:
+    - List of string containing the output of a generator. This list contains a list of predicate :
+        - `blue(X,Y)` for the position of blue cells
+        - `red(X,Y)` for the position of red cells
+        - `params(N,M,K)` for the size of the grid (N X M) and the maximum number of blue cells that can be covered
+        - `[one/two/three/four]_sol(T, X, Y)` a piece of type T is in the set and used in the solution
+
+    # Outputs:
+    - The corresponding board. (without pieces)
+    - The list of pieces available. (A list of tuples (piece_type, number_of_pieces))
+    - A string containing the corrsponding solver input for the generated instance.
+    """
+
+    board = None
+    # Find params
+    params = first_true(generated, None, pred=lambda x: x.startswith("params"))
+    if params is None:
+        print("Error: params not found in the generated output")
+        exit(1)
+    n, m, k = params.split("(")[1].split(")")[0].split(",")
+    n = int(n)
+    m = int(m)
+    k = int(k)
+    board = np.zeros((m, n), dtype=int)
+
+
+    color_tile = []
+    tiles_dict = {}
+
+    # Iterate over the generated output
+    for pred in generated:
+        if pred.startswith("blue") or pred.startswith("red"):
+            # Read blue
+            color, x, y = read_tile(pred)
+            if x >= 0 and y >= 0 and x < n and y < m:
+                color_tile.append((color, x, y))
+                board[m-y-1][x] = color
+
+        elif pred.startswith(("one_sol", "two_sol", "three_sol", "four_sol")):
+            piece_type, tiles = read_sol(pred)
+            if piece_type not in tiles_dict:
+                tiles_dict[piece_type] = 1
+            else:
+                tiles_dict[piece_type] += 1
+
+    output_string = f"params({n},{m},{k}).\n"
+    # Red and blue cells
+    for color, x, y in color_tile:
+        if color == 2:
+            output_string += f"red({x},{y}).\n"
+        elif color == 1:
+            output_string += f"blue({x},{y}).\n"
+
+    output_string += "h("
+    for i in range(11):
+        if i in tiles_dict:
+            output_string += f"{tiles_dict[i]},"
+        else:
+            output_string += "0,"
+    output_string = output_string[:-1] + ").\n"
+
+    pieces = [(piece_type, tiles_dict[piece_type]) for piece_type in tiles_dict]
+    return board, pieces, output_string
+
+
 if __name__ == "__main__":
     import sys
+    import subprocess
 
+    command = "clingo -n 1 --rand-freq=1 --seed=5 solvers/param_generator.lp resources/genInput.db  --verbose=0"
+
+    print("Solving...")
+    output = subprocess.run(command.split(), capture_output=True, text=True)
+
+    output = output.stdout
+
+    if "UNSATISFIABLE" in output:
+        print("No solution found.")
+    else:
+        # Print the solution
+        print("Solution found:")
+        predicates = output.split("\n")[0].split(" ")
+        print(predicates)
+
+        board, pieces, solver_input = read_generated_board(predicates)
+
+        # Save solver input in a file
+        with open("generated_input.db", "w") as f:
+            f.write(solver_input)
+        
+        #display_board(board, "Generated board")
+
+        display_pieces(pieces)
+
+    """
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         print("Usage: python script.py <db file> [<solution>]")
         sys.exit(1)
@@ -300,3 +398,4 @@ if __name__ == "__main__":
     board[3][3] = 3
     print(board)
     display_board(board, db_file)
+    """
