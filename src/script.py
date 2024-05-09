@@ -277,7 +277,7 @@ def display_board(board, name="Board"):
     plt.show()
 
 
-def read_generated_board(generated, ):
+def read_generated_board(generated):
     """
     Read the output of a generator, return the board and a string containing an output corresponding to solver standards  
 
