@@ -1,0 +1,4 @@
+params(30,30,0).
+redNumber(378).
+blueNumber(0).
+pieces(100).

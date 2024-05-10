@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from more_itertools import first_true
+import subprocess
+import time
 
 
 pieces_dict = {
@@ -218,13 +220,14 @@ def add_solutions_to_board(board_old, solution_list):
     """
     # Copy the board
     board = board_old.copy()
-    m = board.shape[0] # Number of rows
+    m = len(board) # Number of rows
 
     for solution in solution_list:
-        piece_type, tiles = read_sol(solution)
-        for tile in tiles:
-            x, y = tile
-            board[m - y - 1][x] = piece_type + 2  # Add 2 to differentiate the pieces from the board
+        if solution.startswith("one_sol") or solution.startswith("two_sol") or solution.startswith("three_sol") or solution.startswith("four_sol"):
+            piece_type, tiles = read_sol(solution)
+            for tile in tiles:
+                x, y = tile
+                board[m - y - 1][x] = piece_type + 2  # Add 2 to differentiate the pieces from the board
 
     return board       
 
@@ -277,7 +280,7 @@ def display_board(board, name="Board"):
     plt.show()
 
 
-def read_generated_board(generated):
+def read_generated_board(generated, pieces_to_add=0):
     """
     Read the output of a generator, return the board and a string containing an output corresponding to solver standards  
 
@@ -335,8 +338,12 @@ def read_generated_board(generated):
         elif color == 1:
             output_string += f"blue({x},{y}).\n"
 
+    if pieces_to_add > 0:
+        # Add random pieces to the instance
+        tiles_dict = add_random_pieces(tiles_dict, pieces_to_add)
+    
     output_string += "h("
-    for i in range(11):
+    for i in range(1,12):
         if i in tiles_dict:
             output_string += f"{tiles_dict[i]},"
         else:
@@ -347,13 +354,55 @@ def read_generated_board(generated):
     return board, pieces, output_string
 
 
-if __name__ == "__main__":
-    import sys
-    import subprocess
+def add_random_pieces(pieces, number=1):
+    """
+    Add random pieces to the list of pieces
 
-    command = "clingo -n 1 --rand-freq=1 --seed=5 solvers/param_generator.lp resources/genInput.db  --verbose=0"
+    - pieces: a list of tuples (piece_type, number_of_pieces)
+    - number: the number of pieces to add
+    """
+    if number == 0:
+        return pieces
+    for _ in range(number):
+        piece_type = np.random.randint(1, 12)
+        if piece_type not in pieces:
+            pieces[piece_type] = 1
+        else:
+            pieces[piece_type] += 1
+    return pieces
 
-    print("Solving...")
+
+def generate_instance(params, output_folder="resources/timeAnalysis/", square=True):
+    print("===================== GENERATE INSTANCE =====================")
+    if square:
+        size, red, blue, pieces, toAdd = params
+        size_x, size_y = size, size
+    else:
+        size_x, size_y, red, blue, pieces, toAdd = params
+
+    print(
+        f"Size: {size_x}x{size_y}, Red: {red}, Blue: {blue}, Pieces: {pieces}, Pieces to add: {toAdd}."
+    )
+
+    k = 0
+
+    # Modify genInput.db file according to the parameters
+    new_input = f"params({size_x},{size_y},{k}).\n"
+    new_red = f"redNumber({red}).\n"
+    new_blue = f"blueNumber({blue}).\n"
+    new_pieces = f"pieces({pieces}).\n"
+    with open("resources/autoGenInput.db", "w") as f:
+        f.write(new_input)
+        f.write(new_red)
+        f.write(new_blue)
+        f.write(new_pieces)
+
+    seed = int(time.time() + np.random.randint(0, 1000))
+
+    file_name = f"{size_x}x{size_y}.{red}.{blue}.db"
+
+    command = f"clingo -n 1 --rand-freq=1 --seed={seed} solvers/param_generator.lp resources/autoGenInput.db  --verbose=0"
+
     output = subprocess.run(command.split(), capture_output=True, text=True)
 
     output = output.stdout
@@ -362,40 +411,20 @@ if __name__ == "__main__":
         print("No solution found.")
     else:
         # Print the solution
-        print("Solution found:")
         predicates = output.split("\n")[0].split(" ")
-        print(predicates)
 
-        board, pieces, solver_input = read_generated_board(predicates)
+        board, pieces, solver_input = read_generated_board(predicates, toAdd)
 
         # Save solver input in a file
-        with open("generated_input.db", "w") as f:
+        with open(f"{output_folder}{file_name}", "w") as f:
             f.write(solver_input)
-        
-        #display_board(board, "Generated board")
 
-        display_pieces(pieces)
+        display_board(board, file_name)
 
-    """
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print("Usage: python script.py <db file> [<solution>]")
-        sys.exit(1)
-    
-    db_file = sys.argv[1]
-    solution = None
-    if len(sys.argv) == 3:
-        solution = sys.argv[2]
-    
-    board, pieces = read_db_file(db_file)
-    print_board(board)
-    display_board(board, db_file)
-    display_pieces(pieces)
 
-    print(board)
-
-    board[3][1] = 3
-    board[3][2] = 3
-    board[3][3] = 3
-    print(board)
-    display_board(board, db_file)
-    """
+if __name__ == "__main__":
+    p = 0.42
+    while True:
+        x = int(input("x size= "))
+        y = int(input("y size= "))
+        print(f"red number = {int(p*x*y)}")
