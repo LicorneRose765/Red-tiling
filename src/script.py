@@ -464,7 +464,7 @@ def compute_difficulty(data):
         return "UNSATISFIABLE OR TIMEOUT"
 
     t = ""
-    if time < 0.01:
+    if time < 0.02:
         t =  "Very Easy"
     elif time < 0.05:
         t =  "Easy"
@@ -479,8 +479,14 @@ def compute_difficulty(data):
 
 
 if __name__ == "__main__":
-    p = 0.42
-    while True:
-        x = int(input("x size= "))
-        y = int(input("y size= "))
-        print(f"red number = {int(p*x*y)}")
+    instance = "resources/input_pdf.db"
+
+    board, pieces = read_db_file(instance)
+
+    display_board(board, instance)
+
+    sol = "two_sol(2,0,3,0,3,1) three_sol(3,90,0,0,1,0,2,0) three_sol(3,90,1,3,2,3,3,3) three_sol(4,90,0,2,1,2,0,3) four_sol(6,90,4,2,4,1,5,1,5,0)"
+
+    board = add_solutions_to_board(board, sol.split())
+
+    display_board(board, "")

@@ -331,7 +331,7 @@ N {red(X, Y) : redPos(X, Y)} N :- redNumber(N).
 % 1 - Store every possible position of blue cells
 bluePos(X, Y) :- params(N+1, M+1, K), X = 0..N, Y = 0..M.
 % 2 - Randomly select BlueNumber of blue cells
-N {blue(X, Y) : bluePos(X, Y)} N :- blueNumber(N).
+N {blue(X, Y) : bluePos(X, Y), not red(X, Y)} N :- blueNumber(N).
 
 
    
