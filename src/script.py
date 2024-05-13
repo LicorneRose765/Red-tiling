@@ -422,6 +422,62 @@ def generate_instance(params, output_folder="resources/timeAnalysis/", square=Tr
         display_board(board, file_name)
 
 
+def run_solver(solver, data, timeout=None):
+    """
+    Run the solver on the given data file and return the time taken to solve it.
+    
+    # Arguments:
+    - solver: The path to the solver file.
+    - data: The path to the .db file.
+
+    # Returns:
+    - The CPU time in seconds taken to solve the instance.
+    """
+    command = f"clingo {solver} {data}"
+    output = subprocess.run(command.split(), capture_output=True, text=True, timeout=timeout)
+
+    if "UNSATISFIABLE" in output.stdout or "UNKNOWN" in output.stdout:
+        return None
+    # find a line starting with CPU Time
+    time_line = [line for line in output.stdout.split("\n") if "CPU Time" in line][0]
+    return float(time_line.split(":")[1].strip().split("s")[0])
+
+
+def compute_difficulty(data):
+    """
+    Compute the difficulty of the given instance.
+    The diffculty is computed by running the solver on the instance and then classifying it based on the time taken to solve it.
+
+    # Arguments:
+    - data: The path to the .db file.
+
+    # Returns:
+    - The time to compute the instance.
+    - The difficulty of the instance. (Very Easy, Easy, Medium, Hard, Very Hard)
+    """
+
+    solver = "solvers/basicSolver.lp"
+    time = run_solver(solver, data, timeout=300) # 5 minutes timeout
+
+
+    if time is None:
+        return "UNSATISFIABLE OR TIMEOUT"
+
+    t = ""
+    if time < 0.01:
+        t =  "Very Easy"
+    elif time < 0.05:
+        t =  "Easy"
+    elif time < 0.1:
+        t = "Medium"
+    elif time < 0.5:
+        t = "Hard"
+    else:
+        t = "Very Hard"
+
+    return (time, t)
+
+
 if __name__ == "__main__":
     p = 0.42
     while True:
