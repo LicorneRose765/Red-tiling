@@ -364,7 +364,7 @@ def add_random_pieces(pieces, number=1):
     if number == 0:
         return pieces
     for _ in range(number):
-        piece_type = np.random.randint(1, 12)
+        piece_type = np.random.randint(2, 12) # Avoid adding dots
         if piece_type not in pieces:
             pieces[piece_type] = 1
         else:
